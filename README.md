@@ -1,13 +1,13 @@
 # SketchSize
 A Sketch plugin that lets you resize your design by simple shortcuts. Helps you output splash screen and screenshot for app store&amp;google play
 
-![image](https://github.com/samlfsun/SketchSize/blob/master/pic/article.png)
+![image](https://github.com/samlfsun/ReadMe-Resources/blob/master/SketchSize/article.png)
 
 Generates 7 different sized images include iOS（iPhone4 / 5 / 7 / 7plus）and Android（hdpi / xhdpi / xxhdpi）
 
 ＃How to use
 
-![image](https://github.com/samlfsun/SketchSize/blob/master/pic/v1.0.gif)
+![image](https://github.com/samlfsun/ReadMe-Resources/blob/master/SketchSize/v1.0.gif)
 
 1.Download the ZIP file and unzip，Open the SketchSize.sketchplugin
 2.Select an Artboard
