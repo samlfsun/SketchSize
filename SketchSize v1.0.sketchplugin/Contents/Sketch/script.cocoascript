@@ -1,0 +1,194 @@
+var onRun = function(context) {
+  //@1x 尺寸
+var ip4Size1X = {w:320, h:480}
+var ip5Size1X = {w:320, h:568}
+var ip6Size1X = {w:375, h:667}
+var ip6pSize1X = {w:414, h:736}
+var andr1Size1X = {w:240, h:400}
+var andr2Size1X = {w:360, h:640}
+var andr3Size1X = {w:540, h:960}
+
+//@2x 尺寸
+var ip4Size2X = {w:640, h:960}
+var ip5Size2X = {w:640, h:1136}
+var ip6Size2X = {w:750, h:1334}
+var ip6pSize3X = {w:1242, h:2208}
+var andr1Size2X = {w:480, h:800}
+var andr2Size2X = {w:720, h:1280}
+var andr3Size2X = {w:1080, h:1920}
+
+//全局
+var kdocument = context.document                       //当前document
+var kpages = kdocument.pages()                         //pages
+var kcurPage = kdocument.currentPage()                 //当前page
+var kartboards = kcurPage.artboards()                  //当前page的所有artboard
+var kcurArtboard = kcurPage.currentArtboard()          //当前选中的artboard
+if (kcurArtboard == null) {
+    kdocument.showMessage('Please choose an artboard as templet');
+}
+else {
+    kdocument.showMessage('loading...');
+}
+var klayers = kcurArtboard.layers()                    //当前选中artboard的所有layer
+
+//对targetlayer以及所有子layer进行检查，如果是MSTextLayer则对其进行字体和字间距的缩放处理，如果是MSShapeGroup则对其border进行处理，如果是MSRectangleShape则对其进行圆角的缩放处理，ratio是缩放比例
+function dealLayerProperties(targetlayer, ratio) {
+    
+    if(targetlayer.class() == MSTextLayer){
+        
+        var fontTarlayer = targetlayer.fontSize();
+        var cSpacingTarlayer = targetlayer.characterSpacing();
+        targetlayer.setFontSize(fontTarlayer / ratio);
+        targetlayer.setCharacterSpacing(cSpacingTarlayer / ratio);
+        
+    }
+    else if (targetlayer.class() == MSShapeGroup) {
+        if (targetlayer.styleGeneric().border() != null) {
+            var borderW = targetlayer.styleGeneric().border().thickness();
+            targetlayer.styleGeneric().border().setThickness(borderW / ratio);
+        }
+        
+        for (var i = 0; i < targetlayer.layers().count(); i++) {
+            var shapeLayer = targetlayer.layers()[i];
+            if (shapeLayer.class() == MSRectangleShape) {
+                var arr = [shapeLayer.cornerRadiusString().componentsSeparatedByString('/')][0];
+                if (arr.count() > 1){
+                    for (var i = 0; i < arr.count(); i++) {
+                        var radius = arr[i];
+                        arr[i] = radius / ratio;
+                    }
+                    shapeLayer.setCornerRadiusString(arr.componentsJoinedByString('/'));
+                }
+                else {
+                    var radius = shapeLayer.cornerRadiusFloat();
+                    shapeLayer.setCornerRadiusFloat(radius / ratio);
+                }
+            }
+        }
+        
+    }
+    else if (targetlayer.class() == MSLayerGroup){
+        
+        for (var i = 0; i < targetlayer.layers().count(); i++) {
+            var layer = targetlayer.layers()[i];
+            dealLayerProperties(layer, ratio);
+        }
+        
+    }
+}
+
+//将当前artboard上所有的layer等比处理后移植到新的artboard上，toArtboard是目标artboard，ratioW=kcurArtboard.w/toArtboard.w，ratioH=kcurArtboard.w.h/toArtboard.h
+function copyLayers(toArtboard, ratioW, ratioH) {
+    for (var i = 0; i < klayers.count(); i++) {
+        var layer = klayers[i];
+        var newlayer = layer.copy()
+        var frameNewlayer = newlayer.frame()
+        
+        if(ratioW > ratioH) {
+            var newX = frameNewlayer.x() / ratioW
+            var newY = frameNewlayer.y() / ratioW + (toArtboard.frame().height() - kcurArtboard.frame().height()/ratioW)/2
+            var newW = frameNewlayer.width() / ratioW
+            var newH = frameNewlayer.height() / ratioW
+        } else {
+            var newX = frameNewlayer.x() / ratioH + (toArtboard.frame().width() - kcurArtboard.frame().width()/ratioH)/2
+            var newY = frameNewlayer.y() / ratioH
+            var newW = frameNewlayer.width() / ratioH
+            var newH = frameNewlayer.height() / ratioH
+        }
+        
+        frameNewlayer.setX(newX)
+        frameNewlayer.setY(newY)
+        frameNewlayer.setWidth(newW)
+        frameNewlayer.setHeight(newH)
+        
+        if(ratioW < ratioH) {
+            dealLayerProperties(newlayer, ratioH);
+        } else {
+            dealLayerProperties(newlayer, ratioW);
+        }
+        
+        toArtboard.addLayers([newlayer])
+    }
+}
+
+//创建新的artboard，并移植相应的layer
+function newArtboard(newX, newY, newW, newH) {
+    var curBoardW = kcurArtboard.frame().width()
+    var curBoardH = kcurArtboard.frame().height()
+    
+    var newBoard = MSArtboardGroup.new()
+    var newFrame = newBoard.frame()
+    newFrame.setX(newX)
+    newFrame.setY(newY)
+    newFrame.setWidth(newW)
+    newFrame.setHeight(newH)
+    newBoard.setName(kcurArtboard.name() + '/' + newFrame.width()*2 + '×' + newFrame.height()*2)
+    if(newFrame.width() == 414) {
+        newBoard.setName(kcurArtboard.name() + '/' + newFrame.width()*3 + '×' + newFrame.height()*3)
+    }
+
+    copyLayers(newBoard, curBoardW/newFrame.width(), curBoardH/newFrame.height())
+    
+    var backColor = kcurArtboard. backgroundColor()
+    var hasBackColor = kcurArtboard. hasBackgroundColor()
+    newBoard.setBackgroundColor(backColor)
+    newBoard.setHasBackgroundColor(hasBackColor)
+    
+    kcurPage.addLayers([newBoard])
+}
+
+//入口
+function enter() {
+    //@1x
+    var originX = kcurArtboard.frame().x()
+    var originY = kcurArtboard.frame().y() + kcurArtboard.frame().height() + 100
+    newArtboard(originX, originY, ip4Size1X.w, ip4Size1X.h)
+    
+    originX = originX + ip4Size1X.w + 50
+    newArtboard(originX, originY, ip5Size1X.w, ip5Size1X.h)
+    
+    originX = originX + ip5Size1X.w + 50
+    newArtboard(originX, originY, ip6Size1X.w, ip6Size1X.h)
+    
+    originX = originX + ip6Size1X.w + 50
+    newArtboard(originX, originY, ip6pSize1X.w, ip6pSize1X.h)
+    
+    originX = originX + ip6pSize1X.w + 50
+    newArtboard(originX, originY, andr1Size1X.w, andr1Size1X.h)
+    
+    originX = originX + andr1Size1X.w + 50
+    newArtboard(originX, originY, andr2Size1X.w, andr2Size1X.h)
+    
+    originX = originX + andr2Size1X.w + 50
+    newArtboard(originX, originY, andr3Size1X.w, andr3Size1X.h)
+    
+    //@2x
+    //     var originX = kcurArtboard.frame().x()
+    //     var originY = kcurArtboard.frame().y() + kcurArtboard.frame().height() + 100
+    //     newArtboard(originX, originY, ip4Size2X.w, ip4Size2X.h)
+    //
+    //     originX = originX + ip4Size2X.w + 100
+    //     newArtboard(originX, originY, ip5Size2X.w, ip5Size2X.h)
+    //
+    //     originX = originX + ip5Size2X.w + 100
+    //     newArtboard(originX, originY, ip6Size2X.w, ip6Size2X.h)
+    //
+    //     originX = originX + ip6Size2X.w + 100
+    //     newArtboard(originX, originY, ip6pSize3X.w, ip6pSize3X.h)
+    //
+    //     originX = originX + ip6pSize3X.w + 100
+    //     newArtboard(originX, originY, andr1Size2X.w, andr1Size2X.h)
+    //
+    //     originX = originX + andr1Size2X.w + 100
+    //     newArtboard(originX, originY, andr2Size2X.w, andr2Size2X.h)
+    //
+    //     originX = originX + andr2Size2X.w + 100
+    //     newArtboard(originX, originY, andr3Size2X.w, andr3Size2X.h)
+    
+    kdocument.showMessage('Success!');
+}
+
+enter();
+
+
+};

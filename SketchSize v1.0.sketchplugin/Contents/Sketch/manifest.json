@@ -1,0 +1,25 @@
+{
+  "author" : "Jcluan&Samlfsun",
+  "commands" : [
+    {
+      "script" : "script.cocoascript",
+      "name" : "ChangeSize",
+      "shortcut" : "command shift 1",
+      "handlers" : {
+        "run" : "onRun"
+      },
+      "identifier" : "com.tencent.sketch.runscriptidentifier"
+    }
+  ],
+  "menu" : {
+    "items" : [
+      "com.tencent.sketch.runscriptidentifier"
+    ],
+    "title" : "SketchSize"
+  },
+  "identifier" : "com.tencent.sketch.0e78e8e9-ed2e-49d1-9e7d-82668b30aa14",
+  "version" : "1.0",
+  "description" : "",
+  "authorEmail" : "",
+  "name" : "SketchSize"
+}
