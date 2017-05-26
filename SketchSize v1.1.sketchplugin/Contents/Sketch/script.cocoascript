@@ -1,5 +1,5 @@
-var onRun = function(context) {
-  //@1x 尺寸
+          var onRun = function(context) {
+          //@1x 尺寸
 var ip4Size1X = {w:320, h:480}
 var ip5Size1X = {w:320, h:568}
 var ip6Size1X = {w:375, h:667}
@@ -34,6 +34,8 @@ var klayers = kcurArtboard.layers()                    //当前选中artboard的
 //对targetlayer以及所有子layer进行检查，如果是MSTextLayer则对其进行字体和字间距的缩放处理，如果是MSShapeGroup则对其border进行处理，如果是MSRectangleShape则对其进行圆角的缩放处理，ratio是缩放比例
 function dealLayerProperties(targetlayer, ratio) {
     
+    var frameLayer = targetlayer.frame()
+    
     if(targetlayer.class() == MSTextLayer){
         
         var fontTarlayer = targetlayer.fontSize();
@@ -41,11 +43,18 @@ function dealLayerProperties(targetlayer, ratio) {
         targetlayer.setFontSize(fontTarlayer / ratio);
         targetlayer.setCharacterSpacing(cSpacingTarlayer / ratio);
         
+        var lineHeight = targetlayer.lineHeight();
+        targetlayer.setLineHeight(lineHeight / ratio);
+        
+        frameLayer .setX(frameLayer.x())
+        frameLayer .setY(frameLayer.y())
+        frameLayer .setWidth(frameLayer.width() + 4)
+        frameLayer .setHeight(frameLayer.height())
     }
     else if (targetlayer.class() == MSShapeGroup) {
-        if (targetlayer.styleGeneric().border() != null) {
-            var borderW = targetlayer.styleGeneric().border().thickness();
-            targetlayer.styleGeneric().border().setThickness(borderW / ratio);
+        if (targetlayer. style().border() != null) {
+            var borderW = targetlayer. style().border().thickness();
+            targetlayer. style().border().setThickness(borderW / ratio);
         }
         
         for (var i = 0; i < targetlayer.layers().count(); i++) {
@@ -96,10 +105,18 @@ function copyLayers(toArtboard, ratioW, ratioH) {
             var newH = frameNewlayer.height() / ratioH
         }
         
-        frameNewlayer.setX(newX)
-        frameNewlayer.setY(newY)
-        frameNewlayer.setWidth(newW)
-        frameNewlayer.setHeight(newH)
+        if(Math.abs(frameNewlayer.x())<5 && Math.abs(frameNewlayer.y())<5 && Math.abs(frameNewlayer.width() - kcurArtboard.frame().width())<5 && Math.abs(frameNewlayer.height() - kcurArtboard.frame().height())<5) {
+            frameNewlayer.setX(0)
+            frameNewlayer.setY(0)
+            frameNewlayer.setHeight(toArtboard.frame().height())
+            frameNewlayer.setWidth(toArtboard.frame().width())
+        }
+        else {
+            frameNewlayer.setX(newX)
+            frameNewlayer.setY(newY)
+            frameNewlayer.setWidth(newW)
+            frameNewlayer.setHeight(newH)
+        }
         
         if(ratioW < ratioH) {
             dealLayerProperties(newlayer, ratioH);
@@ -126,7 +143,7 @@ function newArtboard(newX, newY, newW, newH) {
     if(newFrame.width() == 414) {
         newBoard.setName(kcurArtboard.name() + '/' + newFrame.width()*3 + '×' + newFrame.height()*3)
     }
-
+    
     copyLayers(newBoard, curBoardW/newFrame.width(), curBoardH/newFrame.height())
     
     var backColor = kcurArtboard. backgroundColor()
@@ -191,4 +208,5 @@ function enter() {
 enter();
 
 
-};
+          };
+          

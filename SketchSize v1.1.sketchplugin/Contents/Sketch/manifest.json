@@ -1,5 +1,5 @@
 {
-  "author" : "Jcluan&Samlfsun",
+  "author" : "jcluan&samlfsun",
   "commands" : [
     {
       "script" : "script.cocoascript",
@@ -12,13 +12,13 @@
     }
   ],
   "menu" : {
+    "title" : "SketchSize",
     "items" : [
       "com.tencent.sketch.runscriptidentifier"
-    ],
-    "title" : "SketchSize"
+    ]
   },
-  "identifier" : "com.tencent.sketch.0e78e8e9-ed2e-49d1-9e7d-82668b30aa14",
-  "version" : "1.0",
+  "identifier" : "com.tencent.sketch.ad4f7239-ca4e-4017-b54a-bffa3bf5eb1b",
+  "version" : "1.1",
   "description" : "",
   "authorEmail" : "",
   "name" : "SketchSize"
