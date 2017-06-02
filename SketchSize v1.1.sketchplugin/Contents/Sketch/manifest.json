@@ -18,6 +18,7 @@
     ]
   },
   "identifier" : "com.tencent.sketch.ad4f7239-ca4e-4017-b54a-bffa3bf5eb1b",
+  "appcast": "https://api.sketchpacks.com/v1/plugins/com.tencent.sketch.ad4f7239-ca4e-4017-b54a-bffa3bf5eb1b/appcast",
   "version" : "1.1",
   "description" : "",
   "authorEmail" : "",
