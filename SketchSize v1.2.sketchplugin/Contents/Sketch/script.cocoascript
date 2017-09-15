@@ -52,9 +52,12 @@ function dealLayerProperties(targetlayer, ratio) {
         frameLayer .setHeight(frameLayer.height())
     }
     else if (targetlayer.class() == MSShapeGroup) {
-        if (targetlayer. style().border() != null) {
-            var borderW = targetlayer. style().border().thickness();
-            targetlayer. style().border().setThickness(borderW / ratio);
+        if (targetlayer.style().borders() != null) {
+            for (var i = 0; i < targetlayer.style().borders().count(); i++) {
+                var styleBorder = targetlayer.style().borders()[i];
+                var borderW = styleBorder.thickness();
+                styleBorder.setThickness(borderW / ratio);
+            }
         }
         
         for (var i = 0; i < targetlayer.layers().count(); i++) {
